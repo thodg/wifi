@@ -40,25 +40,27 @@ int usage (const char *argv0)
 
 void print_nodes (struct wifi_interface *wi)
 {
-	int i;
+	int i = wi->node_count;
 	struct ieee80211_nodereq *n = &wi->node[0];
-	for (i = 0, n = &wi->node[0];
-	     i < wi->node_count;
-	     i++, n++) {
-		printf("  %s\n", n->nr_nwid);
+	while (i-- > 0) {
+		printf("  %s %d\n", n->nr_nwid, (int) n->nr_rssi);
+		n++;
 	}
 }
 
 int main (int argc, char *argv[])
 {
 	struct wifi_interface wi;
-	int err = 0;
-	if (argc != 2)
+	if (argc != 3)
 		return usage(argv[0]);
 	if (wifi_interface(&wi, argv[1]))
 		return 2;
-	err |= wifi_scan(&wi);
-	print_nodes(&wi);
-	err |= wifi_interface_close(&wi);
-	return err;
+	if (!strcmp("scan", argv[2])) {
+	  int err = 0;
+	  err |= wifi_scan(&wi);
+	  print_nodes(&wi);
+	  err |= wifi_interface_close(&wi);
+	  return err;
+	}
+	return 0;
 }
